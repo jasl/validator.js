@@ -9,13 +9,12 @@ var Validator = (function() {
   var _val_rules = [];
 
   /**
-   * Validate a item by rules
+   * Validate a value by rules
    * @param {String} item the value which will be validated
    * @param {Object} pattern validate's strategy
-   * @param {Function} callback will be called after validated
    * @return (Boolean) validate's result
    */
-  self.validate = function(value, pattern, callback) {
+  self.validate = function(value, pattern) {
     var is_correct = true;
     var errors = [];
 
@@ -29,10 +28,6 @@ var Validator = (function() {
         is_correct = false;
         errors.push(pattern.validates[i]);
       }
-    }
-    
-    if (callback) {
-      callback(is_correct, errors);
     }
 
     return is_correct;
