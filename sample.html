@@ -1,0 +1,183 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-CN">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Validator Test</title>
+    <script src="validator_core.js"></script>
+    <script src="browser_validator.js"></script>
+    <script>
+      var v = Validator;
+
+      // when validate item has no callback, use this.
+      v.default_callback = function(item, is_correct) {
+        var tar = document.getElementById(item.identity + '_status');
+        if(tar === null) {
+          return;
+        }
+
+        if (!is_correct) {
+          str = "";
+          for (var i in item.error_messages) {
+            str += item.error_messages[i] + ' ';
+          }
+          tar.innerHTML = str;
+        } else {
+          tar.innerHTML = 'valid';
+        }
+      };
+
+      v.submit_callback = function(error_items) {
+        var str = "";
+
+        for (var i in error_items) {
+          str += error_items[i].display + "\n";
+          for (var j in error_items[i].error_messages) {
+            str += "- " + error_items[i].error_messages[j] + "\n";
+          }
+        }
+        alert(str);
+      };
+      
+      // you can add your own rule.
+      v.add_rule('date', {
+        shoulda : function(value, pattern) {
+          var regex = /^\d{4}-(0?[1-9]|1[0-2])-(0?[1-9]|[1-2]\d|3[0-1])$/;
+          return regex.test(value);
+        }
+      });
+      v.message_templates['date'] = "{display}不是有效的的日期格式。";
+
+      // source can a dom id or a function with a return value.
+      v.ensure({
+        source : function() {
+          return document.getElementById('item2').value + document.getElementById('item3').value;
+        },
+        identity : 'test',
+        display : '字段2和3'
+      }, {
+        validates : ['presence', 'size'],
+        size : {
+          minimium : 8,
+          maximium : 10
+        }
+      });
+      v.ensure({
+        source : 'item1',
+        display : '字段1',
+        condition : function() {
+          return document.getElementById('item2').value !== "xxxxx";
+        }
+      }, {
+        validates : ['presence']
+      });
+      v.ensure({
+        source : 'item2',
+        display : '字段2'
+      }, {
+        validates : ['size'],
+        size : {
+          minimium : 4
+        }
+      });
+      v.ensure({
+        source : 'item3',
+        display : '字段3'
+      }, {
+        validates : ['size'],
+        size : {
+          maximium : 6
+        }
+      });
+      v.ensure({
+        source : 'item4',
+        display : '字段4'
+      }, {
+        validates : ['size'],
+        size : {
+          minimium : 4,
+          maximium : 6
+        }
+      });
+      v.ensure({
+        source : 'item5',
+        display : '字段5'
+      }, {
+        validates : ['format'],
+        format : /^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+((\.[a-zA-Z0-9_-]{2,3}){1,2})$/,
+        message : '{display}不是有效的email地址。'
+      });
+      v.ensure({
+        source : 'item6',
+        display : '字段6'
+      }, {
+        validates : ['shoulda'],
+        shoulda : function(value, pattern) {
+          return value == 'hello'
+        },
+        message : '{display}不是hello。'
+      });
+      v.ensure({
+        source : 'item7',
+        display : '字段7'
+      }, {
+        validates : ['inclusion'],
+        inclusion : ['male', 'female']
+      });
+      v.ensure({
+        source : 'item8',
+        display : '字段8'
+      }, {
+        validates : ['presence', 'exclusion'],
+        exclusion : ['nil', 'null']
+      });
+      v.ensure({
+        source : 'item9',
+        display : '字段9'
+      }, {
+        validates : ['presence', 'date']
+      });
+    </script>
+  </head>
+  <body>
+    <form action="#" method="get" id="test_form" onsubmit="return v.check_all(true)">
+      <label> not empty:
+        <input type="text" name="item1" id="item1" onblur="v.check('item1', true)"/>
+        <i id="item1_status"> </i> </label>
+      <br />
+      <label> more than 4:
+        <input type="text" name="item2" id="item2" onblur="v.check('item2', true)"/>
+        <i id="item2_status"> </i> </label>
+      <br />
+      <label> less than 6:
+        <input type="text" name="item3" id="item3" onblur="v.check('item3', true)"/>
+        <i id="item3_status"> </i> </label>
+      <br />
+      <label> between 4 and 6:
+        <input type="text" name="item4" id="item4" onblur="v.check('item4', true)"/>
+        <i id="item4_status"> </i> </label>
+      <br />
+      <label> custom regex:
+        <input type="text" name="item5" id="item5" onblur="v.check('item5', true)"/>
+        <i id="item5_status"> </i> </label>
+      <br />
+      <label> by function:
+        <input type="text" name="item6" id="item6" onblur="v.check('item6', true)"/>
+        <i id="item6_status"> </i> </label>
+      <br />
+      <label> inclusion:
+        <input type="text" name="item7" id="item7" onblur="v.check('item7', true)"/>
+        <i id="item7_status"> </i> </label>
+      <br />
+      <label> exclusion:
+        <input type="text" name="item8" id="item8" onblur="v.check('item8', true)"/>
+        <i id="item8_status"> </i> </label>
+      <br />
+      <label> custom(date):
+        <input type="text" name="item9" id="item9" onblur="v.check('item9', true)"/>
+        <i id="item9_status"> </i> </label>
+      <br />
+      <input type="submit" />
+    </form>
+  </body>
+</html>
