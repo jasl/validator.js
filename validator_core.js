@@ -12,10 +12,9 @@ var Validator = (function() {
    * Validate a value by rules
    * @param {String} item the value which will be validated
    * @param {Object} pattern validate's strategy
-   * @return (Boolean) validate's result
+   * @return (Array) rules which doesn't passed
    */
   self.validate = function(value, pattern) {
-    var is_correct = true;
     var errors = [];
 
     for (var i in pattern.validates) {
@@ -25,12 +24,11 @@ var Validator = (function() {
       }
 
       if (!rule.shoulda(value, pattern)) {
-        is_correct = false;
         errors.push(pattern.validates[i]);
       }
     }
 
-    return is_correct;
+    return errors;
   };
 
   /**
